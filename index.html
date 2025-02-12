@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collect Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            position: relative;
+        }
+        .river {
+            width: 100%;
+            height: 400px;
+            background-color: #1e90ff; /* River blue color */
+            position: relative;
+            overflow: hidden;
+            margin-top: 120px;
+            animation: flow 5s linear infinite; /* Flow animation */
+        }
+
+        /* River flowing animation */
+        @keyframes flow {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        .orange {
+            width: 50px;
+            height: 50px;
+            background-image: url('orange.png'); /* Replace with your image URL */
+            background-size: cover; /* Make the image fit the circle */
+            border-radius: 50%;
+            display: inline-block;
+            text-align: center;
+            line-height: 50px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            position: absolute;
+            transition: all 0.3s ease-in-out;
+        }
+        .orange-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            display: none; /* Initially hide the message */
+        }
+        .orange:hover .orange-message {
+            display: block; /* Show the message when hovering */
+        }
+
+        /* Modal for displaying remark */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Add animation to simulate coin flip */
+        @keyframes coinFlip {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            50% {
+                transform: translate(-200px, -400px) rotate(180deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+
+        .big-orange {
+            width: 500px;
+            height: 500px;
+            background-image: url('orange.png'); /* Replace with your image URL */
+            background-size: cover; /* Make the image fit the circle */
+            border-radius: 50%;
+            text-align: center;
+            line-height: 100px;
+            font-weight: bold;
+            position: absolute;
+            top: 0px; /* Adjust this value to make it higher or lower */
+            left: 50%; /* To center it horizontally */
+            transform: translateX(-50%); /* Center it precisely */
+        }
+
+        /* Animation for falling into the river */
+        @keyframes fallIntoRiver {
+            0% {
+                top: -100px; /* Start above the viewport */
+                transform: translateX(-50%) scale(1);
+            }
+            100% {
+                top: 400px; /* End at the river's position */
+                transform: translateX(-50%) scale(0.5); /* Shrink as it falls */
+            }
+        }
+
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+            z-index: 2; /* To make sure form stays on top of other elements */
+        }
+
+        button {
+            background-color: orange;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: darkorange;
+        }
+
+        /* Style for the large PNG image that will show for 5 seconds */
+        .show-image {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            text-align: center;
+        }
+
+        .show-image img {
+            width: 300px; /* Adjust the size of the image */
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="bigOrange" class="big-orange"></div> <!-- Center big orange -->
+
+    <form id="dataForm">
+        <label for="remark"></label><br><br><br><br><br><br><br><br><br><br>
+        <textarea id="remark" name="remark" rows="5" cols="30"></textarea><br><br>
+        <button type="submit">抛柑</button>
+    </form>
+
+    <div class="river" id="dataContainer"></div> <!-- River container -->
+
+    <!-- Modal for displaying remark -->
+    <div id="remarkModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Remark Details</h2>
+            <p id="remarkText"></p>
+        </div>
+    </div>
+
+    <!-- Large Image Container -->
+    <div id="showImage" class="show-image">
+        <img src="gannina.png" alt="Large Orange" />
+    </div>
+
+    <script>
+        document.getElementById('dataForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const remark = document.getElementById('remark').value;
+            if (remark) {
+                submitData(remark);
+            }
+
+            // Hide the remark textarea and submit button after submission
+            document.getElementById('remark').style.display = 'none';
+            document.querySelector('button[type="submit"]').style.display = 'none';
+
+            triggerFallEffect(); // Trigger the fall animation
+
+            // Delay 3 seconds before showing the large image for 5 seconds
+            setTimeout(function() {
+                showLargeImage(); // Show the large image after 3 seconds
+            }, 2000); // 3000ms = 3 seconds
+        });
+
+        // Function to display the large image
+        function showLargeImage() {
+            const imageDiv = document.getElementById('showImage');
+            imageDiv.style.display = 'block'; // Make the image visible
+
+            setTimeout(function() {
+                imageDiv.style.display = 'none'; // Hide the image after 5 seconds
+            }, 5000); // 5000ms = 5 seconds
+        }
+
+        function triggerFallEffect() {
+            const bigOrange = document.getElementById('bigOrange');
+            bigOrange.style.animation = 'fallIntoRiver 2s ease-in-out'; // Start fall animation
+
+            setTimeout(function() {
+                bigOrange.style.display = 'none'; // Hide big orange after animation ends
+                createRandomOrange(); // Add a new orange to the river
+            }, 2000); // 2 seconds for animation duration
+        }
+
+        function createRandomOrange() {
+            const riverWidth = document.querySelector('.river').offsetWidth;
+            const riverHeight = document.querySelector('.river').offsetHeight;
+            const maxOrangeX = riverWidth - 60;
+            const maxOrangeY = riverHeight - 60;
+
+            const randomX = Math.floor(Math.random() * maxOrangeX);
+            const randomY = Math.floor(Math.random() * maxOrangeY);
+
+            // Ensure oranges are not too close
+            const existingOranges = document.querySelectorAll('.orange');
+            for (const orange of existingOranges) {
+                const orangeX = parseInt(orange.style.left, 10);
+                const orangeY = parseInt(orange.style.top, 10);
+
+                // Check if the new orange will overlap with an existing one
+                if (Math.abs(orangeX - randomX) < 60 && Math.abs(orangeY - randomY) < 60) {
+                    return createRandomOrange(); // Retry if overlap occurs
+                }
+            }
+
+            const orange = document.createElement('div');
+            orange.className = 'orange';
+            orange.style.left = `${randomX}px`;
+            orange.style.top = `${randomY}px`;
+            orange.innerHTML = `<div class="orange-message">Click to view</div>`;
+            orange.onclick = function() {
+                showDetails('Your remark here');
+            };
+
+            document.getElementById('dataContainer').appendChild(orange);
+        }
+
+        function submitData(remark) {
+            const data = { remark };
+
+            fetch('https://script.google.com/macros/s/AKfycbzfrplndGcZDjaxsgVsxOeiJMmi2iKSDJnJtWQzia48tDHS8AwNF2OVd5bUbiq5TjGj/exec', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data),
+                mode: 'no-cors'  // Temporarily disable CORS checking
+            })
+            .then(response => {
+                console.log('Data submitted successfully');
+                loadData(); // Reload the data after submission
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function loadData() {
+            fetch('https://script.google.com/macros/s/AKfycbzfrplndGcZDjaxsgVsxOeiJMmi2iKSDJnJtWQzia48tDHS8AwNF2OVd5bUbiq5TjGj/exec')
+            .then(response => response.json())
+            .then(data => {
+                let html = '';
+                const riverWidth = document.querySelector('.river').offsetWidth;
+                const riverHeight = document.querySelector('.river').offsetHeight;
+                const maxOrangeX = riverWidth - 60;
+                const maxOrangeY = riverHeight - 60;
+
+                data.forEach(item => {
+                    const randomX = Math.floor(Math.random() * maxOrangeX);
+                    const randomY = Math.floor(Math.random() * maxOrangeY);
+
+                    html += `<div class="orange" style="left: ${randomX}px; top: ${randomY}px;" 
+                            onclick="showDetails(decodeURIComponent('${encodeURIComponent(item.remark)}'))">
+                            <div class="orange-message">Click to view</div>
+                        </div>`;
+                });
+
+                document.getElementById('dataContainer').innerHTML = html;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function showDetails(remark) {
+            const modal = document.getElementById('remarkModal');
+            const remarkText = document.getElementById('remarkText');
+            remarkText.innerText = remark.replace(/\n/g, '\n'); // 确保换行显示
+            modal.style.display = 'flex'; // 显示弹窗
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('remarkModal');
+            modal.style.display = 'none';
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
