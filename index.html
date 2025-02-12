@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diu Orange</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            position: relative;
+            background: linear-gradient(to top, #003366, #000);
+        }
+        
+        .river {
+            width: 100%;
+            height: 250px;
+            background-color: #1e90ff; /* River blue color */
+            position: fixed; /* Keeps it at the bottom */
+            bottom: 0; /* Sticks to bottom */
+            left: 0; /* Align to left */
+            overflow: hidden;
+            animation: flow 5s linear infinite;
+        }
+
+        /* River flowing animation */
+        @keyframes flow {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        .orange {
+            width: 50px;
+            height: 50px;
+            background-image: url('orange.png'); /* Replace with your image URL */
+            background-size: cover; /* Make the image fit the circle */
+            border-radius: 50%;
+            display: inline-block;
+            text-align: center;
+            line-height: 50px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            position: absolute;
+            transition: all 0.3s ease-in-out;
+        }
+        .orange-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            display: none; /* Initially hide the message */
+        }
+        .orange:hover .orange-message {
+            display: block; /* Show the message when hovering */
+        }
+
+        /* Modal for displaying remark */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Add animation to simulate coin flip */
+        @keyframes coinFlip {
+            0% { transform: scale(1) rotateX(0deg) translateY(0px) translateZ(0px); opacity: 1; }
+            50% { transform: scale(1.2) rotateX(180deg) translateY(-150px) translateZ(100px); opacity: 0.8; }
+            100% { transform: scale(0) rotateX(360deg) translateY(300px) translateZ(200px); opacity: 0; }
+        }
+
+        .big-orange {
+            width: 500px;
+            height: 500px;
+            background-image: url('orange.png'); /* Replace with your image URL */
+            background-size: cover; /* Make the image fit the circle */
+            border-radius: 50%;
+            text-align: center;
+            line-height: 100px;
+            font-weight: bold;
+            position: absolute;
+            top: 0px; /* Adjust this value to make it higher or lower */
+            left: 50%; /* To center it horizontally */
+            transform: translateX(-50%); /* Center it precisely */
+        }
+
+        /* Animation for falling into the river */
+        @keyframes fallIntoRiver {
+            0% {
+                top: -100px; /* Start above the viewport */
+                transform: translateX(-50%) scale(1);
+            }
+            100% {
+                top: 400px; /* End at the river's position */
+                transform: translateX(-50%) scale(0.5); /* Shrink as it falls */
+            }
+        }
+
+        form {
+            position: absolute; /* Attach to the big orange */
+            top: 50%; /* Center vertically */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%); /* Precise centering */
+            text-align: center;
+            width: 80%; /* Adjust width as needed */
+            padding-bottom: 350px;
+        }
+
+        textarea {
+            width: 100%; /* Make sure it fits inside */
+            max-width: 250px; /* Prevent it from becoming too wide */
+        }
+
+        button {
+            background-color: orange;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: darkorange;
+        }
+
+        /* Style for the large PNG image that will show for 5 seconds */
+        .show-image {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            text-align: center;
+        }
+
+        .show-image img {
+            width: 300px; /* Adjust the size of the image */
+            height: auto;
+        }
+
+        /* Floating effect for oranges in the river */
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .orange {
+            animation: float 3s ease-in-out infinite; /* Oranges will gently float */
+        }
+
+        /* Flip animation for newly thrown oranges */
+        @keyframes flipAndFall {
+            0% {
+                transform: translateY(-200px) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(50px) rotate(180deg);
+            }
+            100% {
+                transform: translateY(0) rotate(360deg);
+                opacity: 1;
+            }
+        }
+
+        /* Apply the flip animation when an orange is added */
+        .new-orange {
+            animation: flipAndFall 1.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="bigOrange" class="big-orange"></div> <!-- Center big orange -->
+
+    <form id="dataForm">
+        <label for="remark"></label><br><br><br><br><br><br><br><br><br><br>
+        <textarea id="remark" name="remark" rows="5" cols="30"></textarea><br><br>
+        <button type="submit">抛柑</button>
+    </form>
+
+    <div class="river" id="dataContainer"></div> <!-- River container -->
+
+    <!-- Modal for displaying remark -->
+    <div id="remarkModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Remark Details</h2>
+            <p id="remarkText"></p>
+        </div>
+    </div>
+
+    <div id="youtubePlayer"></div>
+
+    <!-- Large Image Container -->
+    <div id="showImage" class="show-image">
+        <img src="gannina.png" alt="Large Orange" />
+    </div>
+
+    <script>
+        var player;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtubePlayer', {
+                height: '0',
+                width: '0',
+                videoId: '1uwl-kOTER8',
+                playerVars: {
+                    'autoplay': 0,
+                    'loop': 1,
+                    'controls': 0,
+                    'rel': 0,
+                    'showinfo': 0
+                }
+            });
+        }
+
+        document.getElementById('dataForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const remarkInput = document.getElementById('remark');
+            const formContainer = document.getElementById('dataForm');
+
+            const remark = remarkInput.value.trim();
+            if (remark) {
+                submitData(remark);
+            }
+
+            formContainer.style.display = 'none'; // Hide form
+            triggerFallEffect(() => {
+                setTimeout(() => {
+                    formContainer.style.display = 'block';
+                    remarkInput.value = ''; // Clear input
+                }, 1000);
+            });
+
+            showLargeImage();
+        });
+
+        function showLargeImage() {
+            const imageDiv = document.getElementById('showImage');
+
+            // Reset display
+            imageDiv.style.display = 'block';
+
+            // Ensure it hides after 5 seconds and can be triggered again
+            setTimeout(() => {
+                imageDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function triggerFallEffect(callback) {
+            const bigOrange = document.getElementById('bigOrange');
+            bigOrange.style.animation = 'coinFlip 2s ease-in-out';
+
+            setTimeout(function() {
+                bigOrange.style.display = 'none'; // Hide big orange after animation
+                createRandomOrange(); // Add new orange to the river
+
+                // Reappear the big orange and reset UI
+                setTimeout(() => {
+                    bigOrange.style.display = 'block';
+                    bigOrange.style.animation = ''; // Reset animation
+                    if (callback) callback(); // Restore input field and button
+                }, 1000);
+            }, 2000);
+        }
+
+        function createRandomOrange() {
+            const riverWidth = document.querySelector('.river').offsetWidth;
+            const riverHeight = document.querySelector('.river').offsetHeight;
+            const maxOrangeX = riverWidth - 60;
+            const maxOrangeY = riverHeight - 60;
+
+            const randomX = Math.floor(Math.random() * maxOrangeX);
+            const randomY = Math.floor(Math.random() * maxOrangeY);
+
+            const orange = document.createElement('div');
+            orange.className = 'orange new-orange'; // Add new-orange class for animation
+            orange.style.left = `${randomX}px`;
+            orange.style.top = `${randomY}px`;
+            orange.onclick = function () {
+                showDetails('Your remark here');
+            };
+
+            document.getElementById('dataContainer').appendChild(orange);
+
+            // Remove new-orange class after animation to prevent re-triggering
+            setTimeout(() => {
+                orange.classList.remove('new-orange');
+            }, 1500);
+        }
+
+        function submitData(remark) {
+            const data = { remark };
+
+            fetch('https://script.google.com/macros/s/AKfycbzfrplndGcZDjaxsgVsxOeiJMmi2iKSDJnJtWQzia48tDHS8AwNF2OVd5bUbiq5TjGj/exec', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data),
+                mode: 'no-cors'  // Temporarily disable CORS checking
+            })
+            .then(response => {
+                console.log('Data submitted successfully');
+                loadData(); // Reload the data after submission
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function loadData() {
+            fetch('https://script.google.com/macros/s/AKfycbzfrplndGcZDjaxsgVsxOeiJMmi2iKSDJnJtWQzia48tDHS8AwNF2OVd5bUbiq5TjGj/exec')
+            .then(response => response.json())
+            .then(data => {
+                let html = '';
+                const riverWidth = document.querySelector('.river').offsetWidth;
+                const riverHeight = document.querySelector('.river').offsetHeight;
+                const maxOrangeX = riverWidth - 60;
+                const maxOrangeY = riverHeight - 60;
+
+                data.forEach(item => {
+                    const randomX = Math.floor(Math.random() * maxOrangeX);
+                    const randomY = Math.floor(Math.random() * maxOrangeY);
+
+                    html += `<div class="orange" style="left: ${randomX}px; top: ${randomY}px;" 
+                            onclick="showDetails(decodeURIComponent('${encodeURIComponent(item.remark)}'))">
+                        </div>`;
+                });
+
+                document.getElementById('dataContainer').innerHTML = html;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function showDetails(remark) {
+            document.getElementById('remarkText').innerText = remark;
+            document.getElementById('remarkModal').style.display = 'flex';
+
+            if (player && typeof player.playVideo === 'function') {
+                player.playVideo();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('remarkModal').style.display = 'none';
+
+            if (player && typeof player.stopVideo === 'function') {
+                player.stopVideo();
+            }
+        }
+
+        loadData();
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") { 
+                closeModal();
+            }
+        });
+    </script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>
